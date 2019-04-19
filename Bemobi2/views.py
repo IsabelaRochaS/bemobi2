@@ -2,6 +2,7 @@ import json
 import string
 import random
 import time
+import webbrowser
 from flask import request, jsonify, Blueprint, abort,render_template
 from flask.views import MethodView
 from Bemobi2 import db, app
@@ -26,24 +27,36 @@ class UrlEncurtView(MethodView):
     @app.route('/u/urlencurt', methods = ['GET'])
     def getall():   
         urls = UrlEncurt.query.all()
-
-        res = {}
+        returnUrls = {}
         for url in urls:
-            res[url.id] = {
-                'url': url.url,
+            returnUrls[url.id] = {
+                'urloriginal': url.url,
                 'alias': url.alias,
+                'urlencurt': '/u/urlencurt/' + url.alias,
             }
-        return jsonify(res)
+        return jsonify(returnUrls)
 
-    @app.route('/u/urlencurt/<id>', methods = ['GET'])
-    def get(id):   
-        urlreturn = UrlEncurt.query.get(id)
-        res = {
+    @app.route('/u/urlencurt/<alias>', methods = ['GET'])
+    def getByAlias(alias): 
+        urlreturn = UrlEncurt.query.filter(UrlEncurt.alias == alias).first()
+
+        if not urlreturn:
+            returnUrl = {
+                'alias': alias,   
+                'err_code': "002",
+                'description': "SHORTENED URL NOT FOUND",
+                }
+            return jsonify(returnUrl)
+
+        urlopen = 'https://' + urlreturn.url
+        webbrowser.open(urlopen)
+
+        returnUrl = {
             'urlencurt': '/u/urlencurt/' + urlreturn.alias,
             'urloriginal': urlreturn.url,
             }
 
-        return jsonify(res)
+        return jsonify(returnUrl)
 
     @app.route('/u/urlencurt', methods = ['POST'])
     def post():
@@ -67,49 +80,17 @@ class UrlEncurtView(MethodView):
                     }
                 })
 
-        coisa = UrlEncurt(url, alias)
+        returnUrl = UrlEncurt(url, alias)
 
-        db.session.add(coisa)
+        db.session.add(returnUrl)
         db.session.commit()
         end = time. time()
         finaltime= str(end-start)
-        return jsonify({coisa.id: {
-            'urloriginal': coisa.url,
-            'alias': coisa.alias,
-            'urlencurtada': '/u/urlencurt/' + coisa.alias,
+        return jsonify({returnUrl.id: {
+            'urloriginal': returnUrl.url,
+            'alias': returnUrl.alias,
+            'urlencurtada': '/u/urlencurt/' + returnUrl.alias,
             "statistics": {
                        "time_taken": finaltime,
             }
         }})
-
-#urlEncurt_view =  UrlEncurtView.as_view('urlEncurt_view')
-#app.add_url_rule(
-#    '/u/url/', view_func=urlEncurt_view, methods=['POST']
-#)
-
-    #def put(self, id):
-    #    # Update the record for the provided id
-    #    # with the details provided.
-    #    return
-
-
-
-#@app.route('/contact')
-#def contact():
-#    """Renders the contact page."""
-#    return render_template(
-#        'contact.html',
-#        title='Contact',
-#        year=datetime.now().year,
-#        message='Your contact page.'
-#    )
-
-#@app.route('/about')
-#def about():
-#    """Renders the about page."""
-#    return render_template(
-#        'about.html',
-#        title='About',
-#        year=datetime.now().year,
-#        message='Your application description page.'
-#    )
