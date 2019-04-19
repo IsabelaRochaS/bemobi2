@@ -36,6 +36,7 @@ class UrlEncurtView(MethodView):
             }
         return jsonify(returnUrls)
 
+    #Caso2
     @app.route('/u/urlencurt/<alias>', methods = ['GET'])
     def getByAlias(alias): 
         urlreturn = UrlEncurt.query.filter(UrlEncurt.alias == alias).first()
