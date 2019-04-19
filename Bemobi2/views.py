@@ -26,6 +26,7 @@ class UrlEncurtView(MethodView):
     @app.route('/u/urlencurt', methods = ['GET'])
     def getall():   
         urls = UrlEncurt.query.all()
+
         res = {}
         for url in urls:
             res[url.id] = {
