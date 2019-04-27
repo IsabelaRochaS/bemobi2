@@ -8,6 +8,7 @@ from flask.views import MethodView
 from Bemobi2 import db, app
 from Bemobi2.model import UrlEncurt
 from datetime import datetime
+from sqlalchemy import desc
 
 start = time. time()
 
@@ -26,15 +27,19 @@ class UrlEncurtView(MethodView):
  
     @app.route('/u/urlencurt', methods = ['GET'])
     def getall():   
-        urls = UrlEncurt.query.all()
+        urls = UrlEncurt.query.order_by(desc(UrlEncurt.numVisita)).limit(10)
         returnUrls = {}
+        cont = 1
         for url in urls:
-            returnUrls[url.id] = {
+            returnUrls[cont] = {
                 'urloriginal': url.url,
                 'alias': url.alias,
                 'urlencurt': '/u/urlencurt/' + url.alias,
+                'acessos': url.numVisita
             }
-        return jsonify(returnUrls)
+            cont = cont + 1
+        
+        return render_template('getvisitados.html', info= returnUrls)
 
     #Caso2
     @app.route('/u/urlencurt/<alias>', methods = ['GET'])
@@ -52,9 +57,16 @@ class UrlEncurtView(MethodView):
         urlopen = 'https://' + urlreturn.url
         webbrowser.open(urlopen)
 
+        visita = urlreturn.numVisita + 1
+        urlreturn.numVisita = visita 
+
+        db.session.add(urlreturn)
+        db.session.commit()
+
         returnUrl = {
             'urlencurt': '/u/urlencurt/' + urlreturn.alias,
             'urloriginal': urlreturn.url,
+            'visitas': urlreturn.numVisita,
             }
 
         return jsonify(returnUrl)
@@ -63,6 +75,7 @@ class UrlEncurtView(MethodView):
     def post():
         url = request.json['url']
         alias = request.json['alias']
+        numVisita = 0
 
         if not alias:
             alias = id_generator()
@@ -81,7 +94,7 @@ class UrlEncurtView(MethodView):
                     }
                 })
 
-        returnUrl = UrlEncurt(url, alias)
+        returnUrl = UrlEncurt(url, alias, numVisita)
 
         db.session.add(returnUrl)
         db.session.commit()

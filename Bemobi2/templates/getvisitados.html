@@ -1,0 +1,21 @@
+﻿<!DOCTYPE html>
+<link href="../static/content/bootstrap.css" rel="stylesheet" />
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <h3>As 10 urls mais acessadas:</h3>
+    {% for cada in info.values() %}
+    <article class="media-body content-section">
+        <div class="media-body">
+            <p class="text-secondary">Url Original: {{ cada.urloriginal }}</p>
+            <p class="text-secondary">Alias: {{ cada.alias }}</p>
+            <p class="text-secondary">Url Encurtada: {{ cada.urlencurt }}</p>
+            <p class="text-secondary">Acessos: {{ cada.acessos }}</p>
+        </div>
+    </article>
+    {% endfor %}
+</body>
+</html>

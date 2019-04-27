@@ -44,6 +44,7 @@
     <Folder Include="Bemobi2\templates\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Bemobi2\templates\getvisitados.html" />
     <Content Include="requirements.txt" />
     <Content Include="Bemobi2\static\content\bootstrap.css" />
     <Content Include="Bemobi2\static\content\bootstrap.min.css" />
